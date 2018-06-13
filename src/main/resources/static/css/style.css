@@ -31,14 +31,23 @@ label {
   margin: 0;
   padding: 0;
 }
+
 #messages {
   text-align: center;
   background-color: darkgrey;
   max-width: 50%;
   margin: 0 auto;
   padding-top: 50px;
-  padding-bottom: 100px;
   width: auto;
+}
+/* java-js problem */
+#msg2 {
+  text-align: center;
+  background-color: darkgrey;
+  max-width: 50%;
+  margin: 0 auto;
+  width: auto;
+  margin-bottom: 90px;
 }
 .main-content {
   width: 100%;
