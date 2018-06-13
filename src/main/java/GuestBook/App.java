@@ -4,25 +4,27 @@ import GuestBook.messageDAO.ConnectionProvider;
 import GuestBook.messageDAO.InterfaceDAO;
 import GuestBook.messageDAO.MessageDAO;
 import GuestBook.messageDAO.Models.Message;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpServer;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class App {
     public static void main(String[] args) throws IOException {
-//
-//        InterfaceDAO<Message> dao = new MessageDAO();
-//        Message msg = new Message("aaa","bbb","ccc");
-//        try {
-//            dao.add(msg);
-//        } catch(SQLException e) {
-//            System.out.println(e);
-//        }
 
-        // create a server on port 7171
+
+
+
+        // crete a server on port 7171
         HttpServer server = HttpServer.create(new InetSocketAddress(7171), 0);
 
         // set routes
