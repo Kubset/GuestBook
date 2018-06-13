@@ -9,16 +9,21 @@ import com.sun.net.httpserver.HttpHandler;
 import java.io.*;
 import java.net.URLDecoder;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class OpenSite implements HttpHandler {
 
-    private final String fileContent;
+    private String fileContent;
+    InterfaceDAO<Message> dao;
+    String fileName;
 
+    //java-js problem
+//    private List<Message> addedMessages = new ArrayList<>();
+    Message addedMessage;
 
     OpenSite(String fileName) {
-       this.fileContent = makeFileContent(fileName);
+       this.fileName = fileName;
+       dao = new MessageDAO();
     }
 
     @Override
@@ -27,8 +32,9 @@ public class OpenSite implements HttpHandler {
         String response = "";
         String method = httpExchange.getRequestMethod();
 
+
         if(method.equals("GET")){
-            response = fileContent;
+            response = makeFileContent(fileName);
         }
 
         if(method.equals("POST")){
@@ -37,23 +43,73 @@ public class OpenSite implements HttpHandler {
             BufferedReader br = new BufferedReader(isr);
             String formData = br.readLine();
 
-            System.out.println(formData);
             Map<String,String> inputs = parseFormData(formData);
 
-            InterfaceDAO<Message> dao = new MessageDAO();
-            Message msg = new Message(inputs.get("name"), inputs.get("message"), "data");
             try {
-                dao.add(msg);
+                addedMessage = new Message(inputs.get("name"), inputs.get("message"), new Date().toString());
+                dao.add(addedMessage);
+                //java-js problem
+//                addedMessages.add(msg);
+                prepareJson();
             } catch(SQLException e) {}
 
-
-            response = fileContent;
+            response = makeFileContent(fileName);
         }
 
         httpExchange.sendResponseHeaders(200, response.length());
         OutputStream os = httpExchange.getResponseBody();
         os.write(response.getBytes());
         os.close();
+
+    }
+
+    //java js problem
+    private String prepareJson() {
+        List<Message> messages = new ArrayList<>();
+        MessageDAO dao = new MessageDAO();
+        try {
+            messages = dao.get();
+        }
+        catch (Exception e) {
+            System.out.println("blad");}
+
+
+
+        StringBuilder array = new StringBuilder("{\"messages\": [");
+        for(Message msg : messages) {
+            array.append(msg.Serialize());
+            array.append(",");
+        }
+        array.deleteCharAt(array.length()-1);
+        array.append("]}");
+
+        BufferedWriter writer = null;
+        try
+        {
+            writer = new BufferedWriter( new FileWriter("src/main/resources/static/data/exampleData.json"));
+            writer.write(array.toString());
+            System.out.println("zapisano!!");
+
+        }
+        catch ( IOException e)
+        {
+            System.out.println(e);
+        }
+        finally
+        {
+            try
+            {
+                if ( writer != null)
+                    writer.close( );
+            }
+            catch ( IOException e)
+            {
+                System.out.println(e);
+            }
+        }
+
+        return array.toString();
+
     }
 
     private String makeFileContent(String fileName) {
@@ -63,12 +119,30 @@ public class OpenSite implements HttpHandler {
             String str;
             while ((str = in.readLine()) != null) {
                 contentBuilder.append(str);
+
+                //java-js problem
+                if(str.contains("<div id=\"msg2\">") && addedMessage != null) {
+//                    String messageBody;
+//                    for(Message msg : addedMessages) {
+//                       messageBody = "<div class=\"message-element\"><h4>Name:" + msg.getName() +
+//                                     "</h4><p>Message:" + msg.getMessage() +
+//                                     "</p><p>Data:" + msg.getData() + "</p></div>";
+//                       contentBuilder.append(messageBody);
+                     String messageBody;
+                       messageBody = "<div class=\"message-element\"><h4>Name:" + addedMessage.getName() +
+                                     "</h4><p>Message:" + addedMessage.getMessage() +
+                                     "</p><p>Data:" + addedMessage.getData() + "</p></div>";
+                       contentBuilder.append(messageBody);
+                       addedMessage = null;
+
+                }
+
+
             }
             in.close();
         } catch (IOException e) {
             System.out.println(e);
         }
-
         return contentBuilder.toString();
     }
 
