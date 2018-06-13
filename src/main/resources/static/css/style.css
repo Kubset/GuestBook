@@ -14,6 +14,22 @@
   color: darkgoldenrod;
   text-align: center;
 }
+#nav-text {
+  text-align: center;
+  font-size: 50px;
+  color: darkgoldenrod;
+  margin: 0;
+  padding: 0;
+}
+#messages {
+  text-align: center;
+  background-color: darkgrey;
+  max-width: 50%;
+  margin: 0 auto;
+  padding-top: 50px;
+  padding-bottom: 100px;
+  width: auto;
+}
 h4 {
   margin: 0;
 }
