@@ -1,4 +1,4 @@
-
+//no longer used method
 async function addMessage() {
   const val = document.getElementById("messages");
   const name = document.getElementById("name").value;
