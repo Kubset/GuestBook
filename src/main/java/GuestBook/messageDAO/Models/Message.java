@@ -1,6 +1,10 @@
 package GuestBook.messageDAO.Models;
 
-    public class Message {
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+
+public class Message {
 //    private int ID;
     private String message;
     private String data;
@@ -30,4 +34,10 @@ package GuestBook.messageDAO.Models;
         return data;
     }
 
+    public String Serialize() {
+        Gson gson = new GsonBuilder().create();
+        String payloadStr = gson.toJson(this);
+        System.out.println(payloadStr);
+        return payloadStr;
+    }
 }
