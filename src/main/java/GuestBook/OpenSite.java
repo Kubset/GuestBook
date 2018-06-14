@@ -14,16 +14,15 @@ import java.util.*;
 public class OpenSite implements HttpHandler {
 
     private String fileContent;
-    InterfaceDAO<Message> dao;
-    String fileName;
+    private InterfaceDAO<Message> dao;
+    private String fileName;
 
     //java-js problem
-//    private List<Message> addedMessages = new ArrayList<>();
     Message addedMessage;
 
     OpenSite(String fileName) {
        this.fileName = fileName;
-       dao = new MessageDAO();
+       this.dao = new MessageDAO();
     }
 
     @Override
@@ -38,7 +37,6 @@ public class OpenSite implements HttpHandler {
         }
 
         if(method.equals("POST")){
-//            TODO: refactor
             InputStreamReader isr = new InputStreamReader(httpExchange.getRequestBody(), "utf-8");
             BufferedReader br = new BufferedReader(isr);
             String formData = br.readLine();
@@ -49,9 +47,11 @@ public class OpenSite implements HttpHandler {
                 addedMessage = new Message(inputs.get("name"), inputs.get("message"), new Date().toString());
                 dao.add(addedMessage);
                 //java-js problem
-//                addedMessages.add(msg);
                 prepareJson();
-            } catch(SQLException e) {}
+            } catch(SQLException e) {
+                System.err.println("Database operation error \n" + e);
+            }
+
 
             response = makeFileContent(fileName);
         }
@@ -64,16 +64,10 @@ public class OpenSite implements HttpHandler {
     }
 
     //java js problem
-    private String prepareJson() {
+    private String prepareJson() throws SQLException {
+
         List<Message> messages = new ArrayList<>();
-        MessageDAO dao = new MessageDAO();
-        try {
-            messages = dao.get();
-        }
-        catch (Exception e) {
-            System.out.println("blad");}
-
-
+        messages = dao.get();
 
         StringBuilder array = new StringBuilder("{\"messages\": [");
         for(Message msg : messages) {
@@ -84,28 +78,15 @@ public class OpenSite implements HttpHandler {
         array.append("]}");
 
         BufferedWriter writer = null;
-        try
-        {
+
+        try {
             writer = new BufferedWriter( new FileWriter("src/main/resources/static/data/exampleData.json"));
             writer.write(array.toString());
-            System.out.println("zapisano!!");
+            writer.close( );
 
         }
-        catch ( IOException e)
-        {
-            System.out.println(e);
-        }
-        finally
-        {
-            try
-            {
-                if ( writer != null)
-                    writer.close( );
-            }
-            catch ( IOException e)
-            {
-                System.out.println(e);
-            }
+        catch ( IOException e) {
+            System.out.println("String Buffer error \n" + e);
         }
 
         return array.toString();
@@ -115,19 +96,15 @@ public class OpenSite implements HttpHandler {
     private String makeFileContent(String fileName) {
         StringBuilder contentBuilder = new StringBuilder();
         try {
-            BufferedReader in = new BufferedReader(new FileReader("src/main/resources/static/html/" + fileName));
+
+            BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/static/html/" + fileName));
             String str;
-            while ((str = in.readLine()) != null) {
+
+            while ((str = reader.readLine()) != null) {
                 contentBuilder.append(str);
 
                 //java-js problem
                 if(str.contains("<div id=\"msg2\">") && addedMessage != null) {
-//                    String messageBody;
-//                    for(Message msg : addedMessages) {
-//                       messageBody = "<div class=\"message-element\"><h4>Name:" + msg.getName() +
-//                                     "</h4><p>Message:" + msg.getMessage() +
-//                                     "</p><p>Data:" + msg.getData() + "</p></div>";
-//                       contentBuilder.append(messageBody);
                      String messageBody;
                        messageBody = "<div class=\"message-element\"><h4>Name:" + addedMessage.getName() +
                                      "</h4><p>Message:" + addedMessage.getMessage() +
@@ -139,9 +116,9 @@ public class OpenSite implements HttpHandler {
 
 
             }
-            in.close();
+            reader.close();
         } catch (IOException e) {
-            System.out.println(e);
+            System.out.println("String Buffer error \n" + e);
         }
         return contentBuilder.toString();
     }
