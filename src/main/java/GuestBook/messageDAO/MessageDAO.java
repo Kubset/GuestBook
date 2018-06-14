@@ -66,6 +66,7 @@ public class MessageDAO implements InterfaceDAO<Message> {
                                       resultSet.getString("data"));
             messages.add(msg);
         }
+        c.close();
         return messages;
     }
 }
